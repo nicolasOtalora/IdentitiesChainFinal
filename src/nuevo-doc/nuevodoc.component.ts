@@ -1,9 +1,9 @@
 import { Component, OnInit} from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Web3Service } from '../app/util/web3.service';
-
-declare let require: any;
-const identitieschain_artifacts = require('../../build/contracts/IdentitiesChain.json');
+import {RestService } from '../app/rest.service';
+import { Documento } from 'src/documento/Documento';
+import { User } from 'src/registry/user';
 
 @Component({
   selector: 'nuevodoc',
@@ -12,38 +12,41 @@ const identitieschain_artifacts = require('../../build/contracts/IdentitiesChain
 })
 export class NuevoDocComponent implements OnInit{
 
-  IC: any;
-  accounts: string[];
 
-  model = {
-    amount: 0,
-    receiver: '',
-    name: '',
-    account: ''
-  };
 
-  private genre:string;
-  private key:string;
+  documentosJson : Documento[];
+  usuario : User;
   adr:any;
-  constructor(private web3Service: Web3Service,private route: ActivatedRoute, private router: Router) {
-    console.log(web3Service);
-    route.params.subscribe(params => {this.key = params['key'];});
-    route.params.subscribe(params => {this.adr = params['adr'];});
+  constructor(private rest: RestService, private route: ActivatedRoute, private router: Router) {
+    route.params.subscribe(params => {this.adr = params['usuario'];});
+    this.documentosJson = [];
+    this.usuario = new User();
+    this.getAllDocumentos();
+    this.getUser();
   }
 
   ngOnInit():void {
-    console.log('OnInit: ' + this.web3Service);
-    console.log(this);
 
-    this.watchAccount();
+  }
+  getUser(){
+    console.log("adr");
+    console.log(this.adr);
+    this.rest.getUsuario(this.adr).subscribe((data: any) => {
+      console.log("get User");
+      console.log(data);
+      this.usuario.usuario = data[0].usuario;
+      this.usuario.contrasena = data[0].contrasena;
+      this.usuario.documentos = data[0].documentos;
+      this.usuario.permisos = data[0].permisos;
 
-    this.web3Service.artifactsToContract(identitieschain_artifacts)
-      .then((ICAbstraction) => {
-        this.IC = ICAbstraction;
-        this.IC.deployed().then(deployed => {
-          console.log("IC instanciado: "+deployed);
-        });
-      });
+    });
+  }
+  getAllDocumentos(){
+    this.rest.getAllDocumentos(this.adr).subscribe((data: any) => {
+      // console.log(data);
+      this.documentosJson = data;
+    });
+
   }
 
   public alert(){
@@ -53,39 +56,21 @@ export class NuevoDocComponent implements OnInit{
       (<HTMLInputElement>list[i]).value = "";
     }
   }
+  createDoc(nombre: string, url: string, hash: string){
+    let documento = new Documento();
+    documento.nombre = nombre;
+    documento.url = url;
+    documento.hash = hash;
+    this.usuario.documentos.push(documento);
+    this.rest.updateUser(this.usuario.usuario,this.usuario).subscribe((result) => {
 
-  async createDoc(nombre: string, url: string, hash: string){
-
-    var idDoc = hash;
-
-    console.log("idDoc:" + idDoc+ " cuenta: "+this.model.account);
-    try {
-      const deployedIC = await this.IC.deployed();
-      const iCTransaction = await deployedIC.nuevoDocumento.sendTransaction(nombre, url, hash, idDoc, {from: this.model.account});
-
-
-      if (!iCTransaction) {
-        console.log('Transaction failed!');
-      } else {
-        console.log('Transaction complete!');
-        this.alert();
-        this.redireccionar(this.key);
-      }
-    } catch (e) {
-      console.log(e);
-      console.log('Error sending coin; see log.');
-    }
-
-  }
-
-  watchAccount() {
-    this.web3Service.accountsObservable.subscribe((accounts) => {
-      console.log("account: ");
-      console.log(accounts[0]);
-      this.accounts = accounts;
-      this.model.account = accounts[0];
+    }, (err) => {
+      console.log(err);
     });
   }
+
+
+
 
   redireccionar(key){
     //let route = this.router.config.find(r => r.path === 'menu');

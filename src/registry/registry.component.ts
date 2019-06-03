@@ -3,27 +3,16 @@ import { User } from './user';
 import { NgbModalConfig, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Web3Service } from '../app/util/web3.service';
 import { Router } from '@angular/router';
-
-declare let require: any;
-const identitieschain_artifacts = require('../../build/contracts/IdentitiesChain.json');
+import {RestService } from '../app/rest.service';
 
 @Component({
   selector: 'app-registry',
   templateUrl: 'registry.component.html',
-  providers: [NgbModalConfig, NgbModal],
+  providers: [NgbModalConfig, NgbModal, RestService],
   styleUrls: ['./registry.component.css']
 })
 export class RegistryComponent implements OnInit {
 
-  IC: any;
-  accounts: string[];
-
-  model = {
-    amount: 0,
-    receiver: '',
-    name: '',
-    account: ''
-  };
 
   public same = true;
 
@@ -31,23 +20,11 @@ export class RegistryComponent implements OnInit {
   @Input() password: string;
   @Input() password2: string;
 
-  constructor(config: NgbModalConfig, private modalService: NgbModal, private web3Service: Web3Service, private router: Router) {
-    console.log('Constructor: ' + web3Service);
+  constructor(config: NgbModalConfig,private rest: RestService, private modalService: NgbModal,private router: Router) {
   }
 
   ngOnInit(): void {
-    console.log('OnInit: ' + this.web3Service);
-    console.log(this);
 
-    this.watchAccount();
-
-    this.web3Service.artifactsToContract(identitieschain_artifacts)
-      .then((ICAbstraction) => {
-        this.IC = ICAbstraction;
-        this.IC.deployed().then(deployed => {
-          console.log(deployed);
-        });
-      });
   }
 
   onChanges(){
@@ -58,49 +35,27 @@ export class RegistryComponent implements OnInit {
     }
   }
 
-  async addUser(user: string, pass: string, pass2: string, content){
+  addUser(user: string, pass: string, pass2: string, content){
     var usuario ="";
     let us = new User();
-    us.user = user;
+    us.usuario = user;
     if(pass == pass2){
-      us.password = pass;
+      us.contrasena = pass;
+      this.rest.addUser(us).subscribe((result) => {
+        console.log(result);
 
-      this.userName= '';
-      this.password = '';
-      this.password2 = '';
+        this.userName= '';
+        this.password = '';
+        this.password2 = '';
 
-      this.modalService.open(content, { centered: true, size:'sm' });
+        this.modalService.open(content, { centered: true, size:'sm' });
+        this.router.navigateByUrl(`menu/${us.usuario}`);
 
-      try {
-        const deployedIC = await this.IC.deployed();
-        console.log("Cuenta: ");
-        console.log(this.model.account);
-        let cuenta = ""+this.model.account;
+      }, (err) => {
+        console.log(err);
+      });
 
-        const iCTransaction = await deployedIC.nuevoUsuario.sendTransaction(this.userName, this.password, this.model.account.toString(), {from: this.model.account});
-
-        if (!iCTransaction) {
-          console.log('Transaction failed!');
-        } else {
-          console.log('Transaction complete!');
-          this.router.navigateByUrl(`${'menu'}/${iCTransaction.tx}`);
-          console.log(iCTransaction);
-
-        }
-      } catch (e) {
-        console.log(e);
-        console.log('Error sending coin; see log.');
-      }
     }
-
-
   }
 
-  watchAccount() {
-    this.web3Service.accountsObservable.subscribe((accounts) => {
-      this.accounts = accounts;
-      console.log("--------------------"+accounts);
-      this.model.account = accounts[0];
-    });
-  }
 }

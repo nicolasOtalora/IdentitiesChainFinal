@@ -14,7 +14,7 @@
 <div class="row">
   <div class="menuArea">
     <div class="col-12">
-      <div class="menuDropdown" (click)="getDoc()" (click)="isCollapsed = !isCollapsed" [attr.aria-expanded]="!isCollapsed" aria-controls="parcelCollapse">
+      <div class="menuDropdown" (click)="getAllDocumentos()" (click)="isCollapsed = !isCollapsed" [attr.aria-expanded]="!isCollapsed" aria-controls="parcelCollapse">
 
         <div class="areaName">
           <span style="cursor:pointer">Mis Documentos</span>
@@ -27,12 +27,12 @@
         </ng-template>
       </div>
       <div id="parcelCollapse" [ngbCollapse]="isCollapsed" class="collapseList">
-        <ul *ngFor="let doc of documentos" >
+        <ul *ngFor="let doc of documentosJson" >
           <li>
             <div class="icon">
               <img src="assets/images/profileIcon.png" alt="birth" width="35px" height="35px">
             </div>
-            <a routerLink = "../../mostrardocumento/{{doc.hash}}">{{doc.nombre}}</a>
+            <a routerLink = "../../mostrardocumento/{{doc.hash}}/{{adr}}">{{doc.nombre}}</a>
           </li>
         </ul>
         <div class="addIcon">
@@ -55,7 +55,7 @@
       <div class="icon">
         <img src="assets/images/people.png" alt="water" width="35px" height="35px">
       </div>
-      <div routerLink = "../../permisos/" class="areaName">
+      <div routerLink = "../../permisos/{{adr}}" class="areaName">
         <span>Ver permisos</span>
       </div>
     </div>
@@ -67,7 +67,7 @@
       <div class="icon">
         <img src="assets/images/addDocIcon.png" alt="water" width="35px" height="35px">
       </div>
-      <div routerLink = "../../generardocumento/" class="areaName">
+      <div routerLink = "../../generardocumento/{{adr}}" class="areaName">
         <span>Generar Documento</span>
       </div>
     </div>

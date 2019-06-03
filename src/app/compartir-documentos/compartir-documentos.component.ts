@@ -1,82 +1,82 @@
 import { Component, OnInit } from '@angular/core';
-import { Web3Service } from '../util/web3.service';
 import { Router, ActivatedRoute } from '@angular/router';
-
-declare let require: any;
-const identitieschain_artifacts = require('../../../build/contracts/IdentitiesChain.json');
+import {RestService } from '../rest.service';
+import {User} from '../../registry/user';
+import { Documento } from 'src/documento/Documento';
+import { Permiso } from '../permisos/Permiso';
 
 @Component({
   selector: 'app-compartir-documentos',
   templateUrl: './compartir-documentos.component.html',
+  providers: [RestService],
+
   styleUrls: ['./compartir-documentos.component.css']
 })
 export class CompartirDocumentosComponent implements OnInit {
 
-  IC: any;
-  accounts: string[];
+
   hash: string;
-
-  model = {
-    amount: 0,
-    receiver: '',
-    name: '',
-    account: ''
-  };
-
-  constructor(private web3Service: Web3Service, private route: ActivatedRoute, private router: Router) {
+  usuario : string;
+  destinatario : User;
+  documento: Documento;
+  documentosJson : Documento[];
+  constructor(private rest: RestService, private route: ActivatedRoute, private router: Router) {
     route.params.subscribe(params => {this.hash = params['hash'];});
+    route.params.subscribe(params => {this.usuario = params['usuario'];});
+    this.documento = new Documento();
+    this.documentosJson = [];
+    this.destinatario = new User();
+    this.getAllDocumentos();
   }
 
   ngOnInit() {
-    console.log('OnInit: ' + this.web3Service);
-    console.log(this);
 
-    this.watchAccount();
-
-    this.web3Service.artifactsToContract(identitieschain_artifacts)
-      .then((ICAbstraction) => {
-        this.IC = ICAbstraction;
-        this.IC.deployed().then(deployed => {
-          console.log("IC instanciado: "+deployed);
-        });
-      });
   }
+  getDoc(){
+    console.log("getDoc");
+    console.log(this.documentosJson);
 
-  watchAccount() {
-    this.web3Service.accountsObservable.subscribe((accounts) => {
-      this.accounts = accounts;
-      this.model.account = accounts[0];
+    for(let doc of this.documentosJson){
+      if(doc.hash === this.hash){
+        this.documento = doc;
+      }
+    }
+  }
+  getAllDocumentos(){
+    this.rest.getAllDocumentos(this.usuario).subscribe((data: any) => {
+      // console.log(data);
+      this.documentosJson = data;
+
+      this.getDoc();
     });
   }
 
-  async compartirDoc(destinatario: string){
-    try {
+  compartirDoc(){
+    let permiso = new Permiso();
+    permiso.duenio = this.usuario;
+    permiso.documentos.push(this.documento);
+    this.destinatario.permisos.push(permiso);
+    console.log(this.destinatario.usuario);
+    this.rest.updateUser(this.destinatario.usuario,this.destinatario).subscribe((result) => {
 
-      let idPermiso = destinatario + "" + this.hash;
-
-      console.log("destinatario: "+destinatario);
-      console.log("hash: "+this.hash);
-      console.log("idPermiso: "+idPermiso);
-
-
-
-      const deployedIC = await this.IC.deployed();
-      const iCTransaction = await deployedIC.compartir.sendTransaction(destinatario, this.hash, idPermiso, {from: this.model.account});
-
-
-      if (!iCTransaction) {
-        console.log('Transaction failed!');
-      } else {
-        console.log('Transaction complete!');
-      }
-    } catch (e) {
-      console.log(e);
-      console.log('Error sending coin; see log.');
-    }
+    }, (err) => {
+      console.log(err);
+    });
+  }
+  getUser(id){
+    this.rest.getUsuario(id).subscribe((data: any) => {
+      console.log("get User");
+      console.log(data[0].usuario);
+      this.destinatario.usuario = data[0].usuario;
+      this.destinatario.contrasena = data[0].contrasena;
+      this.destinatario.documentos = data[0].documentos;
+      this.compartirDoc();
+    });
   }
 
+
   redireccion(){
-    this.router.navigateByUrl(`${'menu'}/${this.model.account}`);
+    this.router.navigateByUrl(`${'menu'}/${this.usuario}`);
   }
 
 }

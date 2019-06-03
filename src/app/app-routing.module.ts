@@ -22,10 +22,10 @@ const routes: Routes = [
   {path: 'aniadirdocumento', component : AñadirDocumento},
   {path: 'verdocumento/:adr', component : VisualizadorDocumento},
   {path: 'documento/:adr', component : DocumentoComponent},
-  {path: 'generardocumento', component : NuevoDocComponent},
-  {path: 'mostrardocumento/:hash', component : VerDocComponent},
-  {path: 'compartirdocumento/:hash', component : CompartirDocumentosComponent},
-  {path: 'permisos', component : PermisosComponent}
+  {path: 'generardocumento/:usuario', component : NuevoDocComponent},
+  {path: 'mostrardocumento/:hash/:usuario', component : VerDocComponent},
+  {path: 'compartirdocumento/:hash/:usuario', component : CompartirDocumentosComponent},
+  {path: 'permisos/:usuario', component : PermisosComponent}
 ];
 
 @NgModule({

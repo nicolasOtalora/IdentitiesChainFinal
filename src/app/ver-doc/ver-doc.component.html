@@ -19,24 +19,24 @@
         <div class="col-2">
         </div>
         <div class="col-8">
-          <mat-card-title>{{doc.nombre}}</mat-card-title>
+          <mat-card-title>{{documento.nombre}}</mat-card-title>
         </div>
         <div (click)="openModal(content)" class="col-2 qr">
           <img src="../assets/images/qr.png" width="24px" height="24px" alt="">
         </div>
       </div>
     </div>
-    <img mat-card-image src="{{doc.url}}" alt="">
+    <img mat-card-image src="{{documento.url}}" alt="">
     <mat-card-content>
       <div class="row">
         <div class="col-8">
           <h3 class="content-title">Hash</h3>
           <p>
-            {{doc.hash}}
+            {{documento.hash}}
           </p>
         </div>
         <div class="col-4">
-          <span class="icon" routerLink = "../../compartirdocumento/{{doc.hash}}">
+          <span class="icon" routerLink = "../../../compartirdocumento/{{documento.hash}}/{{usuario}}">
             <mat-icon>share</mat-icon>
           </span>
         </div>
@@ -48,7 +48,7 @@
 
 <ng-template #content let-c="close" let-d="dismiss">
   <div class="modal-body">
-    <ngx-qrcode [qrc-element-type]="elementType" [qrc-value] = "doc.url"></ngx-qrcode>
+    <ngx-qrcode [qrc-element-type]="elementType" [qrc-value] = "documento.url"></ngx-qrcode>
   </div>
   <div class="modal-footer">
     <button type="button" class="btn btn-outline-dark" (click)="c('Save click')">Cerrar</button>
