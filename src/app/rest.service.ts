@@ -45,7 +45,7 @@ export class RestService {
   addUser (user): Observable<any> {
     console.log(user);
 
-    return this.http.post<any>(this.endpoint+'registro', JSON.stringify(user), this.httpOptions).pipe(
+    return this.http.post<any>(this.endpoint, JSON.stringify(user), this.httpOptions).pipe(
       tap((user) =>console.log(`updated user id=${user.usuario}`)  ),
       catchError(this.handleError<any>('adduser'))
 
