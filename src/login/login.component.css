@@ -36,7 +36,11 @@ div.fieldLine{
 div.fieldLine input{
   background-color: #0E294B;
   border: 0;
+  color : white;
   width: 100%;
+}
+div.modal-body p {
+  color : black;
 }
 
 div.ps{

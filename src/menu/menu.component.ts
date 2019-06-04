@@ -23,6 +23,7 @@ export class MenuComponent implements OnInit {
 
   constructor(private route: ActivatedRoute,private router: Router, private rest : RestService) {
     route.params.subscribe(params => {this.adr = params['adr'];});
+
     this.documentos = [];
     this.documentosJson = [];
    }

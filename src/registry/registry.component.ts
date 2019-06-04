@@ -15,7 +15,6 @@ export class RegistryComponent implements OnInit {
 
 
   public same = true;
-
   @Input() userName: string;
   @Input() password: string;
   @Input() password2: string;
@@ -42,8 +41,8 @@ export class RegistryComponent implements OnInit {
     if(pass == pass2){
       us.contrasena = pass;
       this.rest.addUser(us).subscribe((result) => {
+        console.log("addUSer");
         console.log(result);
-
         this.userName= '';
         this.password = '';
         this.password2 = '';

@@ -1,18 +1,22 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpErrorResponse,HttpParams } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { map, catchError, tap } from 'rxjs/operators';
 @Injectable({
   providedIn: 'root'
 })
 export class RestService {
+
+
   endpoint = 'http://localhost:8080/myapp/usuarios/';
+  privatekey ='';
   httpOptions = {
     headers: new HttpHeaders({
       'Content-Type':  'application/json'
     })
   };
-  constructor(private http: HttpClient) { }
+  public constructor(private http: HttpClient) { }
+
   private extractData(res: Response) {
     let body = res;
     return body || { };
@@ -25,7 +29,7 @@ export class RestService {
   getAllDocumentos(user): Observable<any> {
     console.log(user);
     console.log("Service GetAll");
-
+    console.log(this.privatekey);
     return this.http.get(this.endpoint+user+"/documentos").pipe(map(this.extractData));
   }
   getAllPermisos(user): Observable<any> {
@@ -35,16 +39,25 @@ export class RestService {
     return this.http.get(this.endpoint+user+"/permisos").pipe(map(this.extractData));
   }
   getUsuario(id): Observable<any> {
+
     return this.http.get(this.endpoint+id).pipe(map(this.extractData));
   }
   addUser (user): Observable<any> {
     console.log(user);
-    return this.http.post<any>(this.endpoint, JSON.stringify(user), this.httpOptions).pipe(
-      tap((user) => console.log(`added user w/ id=${user.usuario}`)),
+
+    return this.http.post<any>(this.endpoint+'registro', JSON.stringify(user), this.httpOptions).pipe(
+      tap((user) =>console.log(`updated user id=${user.usuario}`)  ),
       catchError(this.handleError<any>('adduser'))
+
     );
   }
+
+  setPrivateKey(){
+    // this.httpOptions.headers.append('privateKey', this.privatekey);
+  }
+
   updateUser (id, user): Observable<any> {
+    this.setPrivateKey();
     return this.http.put(this.endpoint + id+'/update',JSON.stringify(user), this.httpOptions).pipe(
       tap(_ => console.log(`updated user id=${id}`)),
       catchError(this.handleError<any>('updateuser'))

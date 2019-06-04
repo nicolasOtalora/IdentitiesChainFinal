@@ -39,6 +39,7 @@ div.textField{
 div.textField input{
   background-color: #0E294B;
   width: 100%;
+  color : white;
   border: 0;
 }
 
